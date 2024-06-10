@@ -22,7 +22,7 @@ public interface RentalManageRepository extends JpaRepository<RentalManage, Long
         long countByStockIdAndStatus(String stockId);
 
         @Query // 登録の在庫の貸出待ち、貸出中をDBから持ってきて、期間が被っていない本の数を取得
-        ("SELECT COUNT(rm) FROM RentalManage rm WHERE rm.stock.id = ?1 AND rm.status IN (0, 1) AND rm.expectedReturnOn < ?2  AND rm.expectedRentalOn > ?3")
+        ("SELECT COUNT(rm) FROM RentalManage rm WHERE rm.stock.id = ?1 AND rm.status IN (0, 1) AND (rm.expectedReturnOn < ?2  OR rm.expectedRentalOn > ?3)")
         long countByStockIdAndStatusAndExpectedDates(String stockId, Date expectedRentalOn, Date expectedReturnOn);
 
         @Query // 変更する在庫の貸出待ち、貸出中をDBから持ってきて、本の数を取得
@@ -30,7 +30,7 @@ public interface RentalManageRepository extends JpaRepository<RentalManage, Long
         long countByStockIdAndStatusIn(String stockId, Long ID);
 
         @Query // 変更する在庫の貸出待ち、貸出中をDBから持ってきて、期間が被っていない本の数を取得
-        ("SELECT COUNT(rm) FROM RentalManage rm WHERE rm.stock.id = ?1 AND rm.status IN (0, 1) AND rm.id != ?2 AND rm.expectedReturnOn < ?3  OR rm.expectedRentalOn > ?4")
+        ("SELECT COUNT(rm) FROM RentalManage rm WHERE rm.stock.id = ?1 AND rm.status IN (0, 1) AND rm.id != ?2 AND (rm.expectedReturnOn < ?3  OR rm.expectedRentalOn > ?4)")
         long countByStockIdAndStatusInAndExpectedDates(String stockId, Long ID, Date expectedRentalOn,
                         Date expectedReturnOn);
 
@@ -41,7 +41,7 @@ public interface RentalManageRepository extends JpaRepository<RentalManage, Long
         Long countBySpecifiedDateRentals(String title, Date specifiedDate);
 
         // タイトル、在庫管理番号
-        @Query(value = "SELECT s.id FROM stocks s Left JOIN rental_manage rm  ON s.id = rm.stock_id JOIN book_mst bm ON s.book_id = bm.id WHERE s.status = 0 AND bm.title= :title AND (rm.stock_id is null OR rm.expected_rental_on > :day OR rm.expected_return_on < :day OR rm.status = 3)", nativeQuery = true)
-        List<String> selectByStockId(@Param("title") String title, @Param("day") Date specifiedDate);
+        @Query(value = "SELECT s.id FROM stocks s Left JOIN rental_manage rm  ON s.id = rm.stock_id JOIN book_mst bm ON s.book_id = bm.id WHERE s.status = 0 AND bm.title= ?1 AND (rm.stock_id is null OR rm.expected_rental_on > ?2 OR rm.expected_return_on < ?2 OR rm.status = 3)", nativeQuery = true)
+        List<String> selectByStockId(String title, Date specifiedDate);
 
 }

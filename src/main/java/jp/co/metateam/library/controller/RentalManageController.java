@@ -71,8 +71,9 @@ public class RentalManageController {
     }
 
     @GetMapping("/rental/add")
-    public String add(@RequestParam("stockId") String stockIds,
-            @RequestParam("expectedRentalOn") @DateTimeFormat(pattern = "yyyy-MM-dd") Date specifiedDate, Model model) {
+    public String add(@RequestParam(required = false) String stockId,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date expectedRentalOn,
+            Model model) {
 
         List<Stock> stockList = this.stockService.findStockAvailableAll();
         List<Account> accounts = this.accountService.findAll();
@@ -85,13 +86,9 @@ public class RentalManageController {
 
             RentalManageDto rentalManageDto = new RentalManageDto();
             // データセット するかしないか
-            if (stockIds != null) {
-                // 在庫管理番号をセット
-                rentalManageDto.setStockId(stockIds);
-            }
-            if (specifiedDate != null) {
-                // 貸出予定日をセット
-                rentalManageDto.setExpectedRentalOn(specifiedDate);
+            if (stockId != null && expectedRentalOn != null) {
+                rentalManageDto.setStockId(stockId);
+                rentalManageDto.setExpectedRentalOn(expectedRentalOn);
             }
 
             model.addAttribute("rentalManageDto", rentalManageDto);
